@@ -1,0 +1,38 @@
+### Dependências do Node.js ###
+# A pasta node_modules contém todos os pacotes que seu projeto usa.
+# Ela é muito grande e pode ser recriada a qualquer momento usando o comando "npm install".
+node_modules/
+
+### Arquivos de Build e Compilados ###
+# A pasta "dist" e o arquivo "outputs.css" são gerados a partir do seu código-fonte.
+# Eles não devem ser versionados, pois são resultado do processo de compilação.
+dist/
+outputs.css
+
+### Logs ###
+# Arquivos de log gerados durante a execução ou depuração.
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+
+### Arquivos de Sistema Operacional ###
+# Arquivos gerados automaticamente pelo sistema operacional.
+.DS_Store
+Thumbs.db
+
+### Arquivos de Ambiente ###
+# Arquivos que guardam variáveis de ambiente e segredos (chaves de API, senhas).
+# É uma prática de segurança muito importante ignorá-los.
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+### Arquivos de Configuração de Editores ###
+# Pastas com configurações específicas do seu editor de código (como o VS Code).
+.vscode/
+.idea/
