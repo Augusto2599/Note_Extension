@@ -1,0 +1,26 @@
+/* Diretivas para o Tailwind injetar suas classes */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Seus estilos personalizados que estavam no styles.css */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+body {
+    font-family: 'Inter', sans-serif;
+}
+
+.modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 1000;
+    justify-content: center;
+    align-items: center;
+}
+
+/* ... (resto do seu CSS) ... */
