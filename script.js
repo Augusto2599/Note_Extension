@@ -42,16 +42,27 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- FUNÇÕES DE RENDERIZAÇÃO ---
     function createCardElement(card) {
         const isLiked = likedCardIds.includes(card.id);
-        const cardElement = document.createElement('div');
-        cardElement.className = `group card-item bg-gradient-to-r from-blue-50 to-indigo-50 rounded-2xl shadow-lg border border-indigo-100 transition-all duration-300 ease-in-out cursor-pointer overflow-hidden`;
+        const cardElement = document.createElement('a');
+
+        // Adiciona o link e define para abrir em nova aba
+        if (card.url) {
+            cardElement.href = card.url;
+            cardElement.target = '_blank';
+            cardElement.rel = 'noopener noreferrer'; // Boa prática de segurança
+        }
+
+        cardElement.className = `group card-item bg-gradient-to-r from-blue-50 to-indigo-50 rounded-2xl shadow-lg border border-indigo-100 transition-all duration-300 ease-in-out cursor-pointer overflow-hidden block`; // Adicionado 'block' para que o 'a' se comporte como 'div'
+        cardElement.dataset.cardId = card.id;
         cardElement.dataset.cardId = card.id;
         cardElement.dataset.type = card.type;
         const heartIconClass = isLiked ? 'fas text-red-500' : 'far';
+        const shortContent = card.content.length > 100 ? card.content.substring(0, 100) + '...' : card.content;
+
         cardElement.innerHTML = `
         <div class="flex justify-between items-start p-4">
             <div class="flex-1">
                 <h3 class="font-semibold text-gray-800 mb-2">${card.title}</h3>
-                <p class="text-gray-600 text-sm">${card.content}</p>
+                <p class="text-gray-600 text-sm">${shortContent}</p> 
             </div>
             <div class="card-user-icon ml-4 flex-shrink-0"><div class="w-12 h-12 text-lg rounded-full flex items-center justify-center text-white font-semibold border-2 border-white shadow-lg"></div></div>
         </div>
@@ -65,14 +76,18 @@ document.addEventListener('DOMContentLoaded', () => {
         </div>`;
         const paragraph = cardElement.querySelector('p');
         const footer = cardElement.querySelector('.card-footer');
-        if (paragraph) paragraph.style.display = 'none';
+
+        // Agora o parágrafo é visível por padrão, e o rodapé continua escondido
         if (footer) footer.style.display = 'none';
+
         cardElement.addEventListener('mouseenter', () => {
-            if (paragraph) paragraph.style.display = 'block';
+            // Ao passar o mouse, mostramos o conteúdo completo
+            if (paragraph) paragraph.textContent = card.content;
             if (footer) footer.style.display = 'flex';
         });
         cardElement.addEventListener('mouseleave', () => {
-            if (paragraph) paragraph.style.display = 'none';
+            // Ao retirar o mouse, voltamos para a prévia
+            if (paragraph) paragraph.textContent = shortContent;
             if (footer) footer.style.display = 'none';
         });
         updateCardAvatar(cardElement);
@@ -198,21 +213,26 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // --- LÓGICAS DOS CARDS ---
+    // Em script.js, na função setupCardActions
     function setupCardActions() {
         cardsContainer.addEventListener('click', (e) => {
             const button = e.target.closest('button');
+            if (!button) return; // Se não clicou em um botão, deixa o link funcionar
+
+            e.preventDefault(); // <-- ADICIONE ESTA LINHA
+            e.stopPropagation(); // <-- E ESTA LINHA para impedir o link de ser seguido
+
             const cardElement = e.target.closest('.card-item');
             if (!cardElement) return;
             const cardId = parseInt(cardElement.dataset.cardId);
-            if (button) {
-                if (button.classList.contains('like-btn')) {
-                    toggleLike(cardId, button.querySelector('.fa-heart'));
-                } else if (button.classList.contains('share-btn')) {
-                    shareCard(cardId);
-                } else if (button.classList.contains('delete-btn')) {
-                    if (confirm('Tem certeza que deseja excluir este card?')) {
-                        deleteCard(cardId, cardElement);
-                    }
+
+            if (button.classList.contains('like-btn')) {
+                toggleLike(cardId, button.querySelector('.fa-heart'));
+            } else if (button.classList.contains('share-btn')) {
+                shareCard(cardId);
+            } else if (button.classList.contains('delete-btn')) {
+                if (confirm('Tem certeza que deseja excluir este card?')) {
+                    deleteCard(cardId, cardElement);
                 }
             }
         });

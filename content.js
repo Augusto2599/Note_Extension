@@ -95,14 +95,14 @@ function hideConfirmationModal() {
 function handleSaveNote() {
     const title = modal.querySelector('#modal-title-input').value.trim();
     const content = modal.querySelector('#modal-content-textarea').value.trim();
+    const url = window.location.href; // <-- ADICIONE ESTA LINHA para pegar a URL
 
     if (title && content) {
         chrome.runtime.sendMessage({
             action: 'saveNote',
-            data: { title, content }
+            data: { title, content, url } // <-- ADICIONE 'url' AQUI
         }, (response) => {
             if (response.status === 'success') {
-                // Aqui poderíamos mostrar uma notificação de sucesso na página
                 console.log('Nota salva!');
             }
         });
