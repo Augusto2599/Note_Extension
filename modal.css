@@ -1,0 +1,121 @@
+/* Estilos para o container do modal injetado */
+#note-extension-modal-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 99998;
+    /* Z-index muito alto para ficar na frente de tudo */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-family: 'Inter', sans-serif;
+}
+
+/* Estilos para o conteúdo do modal */
+#note-extension-modal-container .modal-content {
+    background: white;
+    padding: 2rem;
+    border-radius: 1rem;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+    max-width: 450px;
+    width: 90%;
+    border: 1px solid #e5e7eb;
+}
+
+#note-extension-modal-container h3 {
+    font-size: 1.125rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+    color: #1f2937;
+}
+
+#note-extension-modal-container label {
+    font-size: 0.875rem;
+    color: #4b5563;
+    margin-bottom: 0.5rem;
+    display: block;
+}
+
+#note-extension-modal-container input,
+#note-extension-modal-container textarea {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border: 1px solid #d1d5db;
+    border-radius: 0.75rem;
+    transition: all 0.3s;
+    box-sizing: border-box;
+    /* Garante que padding não afete a largura total */
+}
+
+#note-extension-modal-container input:focus,
+#note-extension-modal-container textarea:focus {
+    outline: none;
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.4);
+}
+
+#note-extension-modal-container textarea {
+    resize: vertical;
+}
+
+#note-extension-modal-container .modal-actions {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 1.5rem;
+    gap: 1rem;
+}
+
+#note-extension-modal-container button {
+    padding: 0.5rem 1.5rem;
+    border-radius: 0.5rem;
+    border: none;
+    cursor: pointer;
+    font-weight: 500;
+    transition: background-color 0.2s;
+}
+
+#note-extension-modal-container button#modal-discard-btn {
+    background-color: #f3f4f6;
+    color: #374151;
+}
+
+#note-extension-modal-container button#modal-discard-btn:hover {
+    background-color: #e5e7eb;
+}
+
+#note-extension-modal-container button#modal-save-btn {
+    background-color: #3b82f6;
+    color: white;
+}
+
+#note-extension-modal-container button#modal-save-btn:hover {
+    background-color: #2563eb;
+}
+
+/* Estilos para o ícone flutuante */
+#note-extension-save-icon {
+    position: absolute;
+    width: 32px;
+    height: 32px;
+    background-color: #1f2937;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 99997;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    transition: transform 0.2s ease;
+}
+
+#note-extension-save-icon:hover {
+    transform: scale(1.1);
+}
+
+#note-extension-save-icon img {
+    width: 16px;
+    height: 16px;
+}

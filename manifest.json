@@ -5,7 +5,6 @@
     "description": "Uma extensão para criar e gerenciar notas.",
     "permissions": [
         "storage",
-        "contextMenus",
         "activeTab",
         "scripting"
     ],
@@ -25,6 +24,29 @@
         "48": "Assets/notes.png",
         "128": "Assets/notes.png"
     },
+    "content_scripts": [
+        {
+            "matches": [
+                "<all_urls>"
+            ],
+            "js": [
+                "content.js"
+            ],
+            "css": [
+                "modal.css"
+            ]
+        }
+    ],
+    "web_accessible_resources": [
+        {
+            "resources": [
+                "Assets/notes.png"
+            ],
+            "matches": [
+                "<all_urls>"
+            ]
+        }
+    ],
     "content_security_policy": {
         "extension_pages": "script-src 'self'; object-src 'self';"
     }

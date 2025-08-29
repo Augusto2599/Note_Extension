@@ -1,16 +1,26 @@
-// Cria o item no menu de contexto
-chrome.runtime.onInstalled.addListener(() => {
-    chrome.contextMenus.create({
-        id: "saveSelectedTextAsNote",
-        title: "Salvar texto como Nota",
-        contexts: ["selection"]
-    });
-});
+// Ouve a mensagem do content script para salvar a nota
+chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+    if (request.action === "saveNote") {
+        const { title, content } = request.data;
 
-// Ouve o clique no item do menu e envia o texto para ser salvo
-chrome.contextMenus.onClicked.addListener((info) => {
-    if (info.menuItemId === "saveSelectedTextAsNote" && info.selectionText) {
-        // Salva o texto selecionado temporariamente no storage local
-        chrome.storage.local.set({ 'newNoteFromSelection': info.selectionText });
+        chrome.storage.sync.get(['cardData'], (result) => {
+            let cardData = result.cardData || [];
+
+            const newCard = {
+                id: Date.now(),
+                type: 'small',
+                title: title,
+                content: content,
+                timestamp: new Date().toLocaleString('pt-BR')
+            };
+
+            cardData.unshift(newCard);
+
+            chrome.storage.sync.set({ 'cardData': cardData }, () => {
+                console.log('Nota salva com sucesso pelo background.');
+                sendResponse({ status: "success" });
+            });
+        });
+        return true; // Necessário para respostas assíncronas
     }
 });
