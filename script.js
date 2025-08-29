@@ -17,29 +17,21 @@ document.addEventListener('DOMContentLoaded', () => {
         { id: 4, type: 'small', title: 'Reunião Equipe', content: 'Preparar agenda para reunião de equipe sobre os próximos passos do projeto principal.', timestamp: '15/08/2023 às 11:30' },
         { id: 5, type: 'small', title: 'Estudos', content: 'Revisar materiais de TailwindCSS e JavaScript para aprofundar conhecimentos técnicos.', timestamp: '20/08/2023 às 14:20' },
     ];
-    let likedCardIds = JSON.parse(localStorage.getItem('likedCardIds')) || [];
-
-    // O avatar salvo permanentemente (apenas os pré-definidos)
+    let likedCardIds = [];
     let currentUserAvatar = {
-        customImage: localStorage.getItem('customAvatar') || 'Assets/Gemini_Generated_Image_boy_one.jpg'
+        customImage: 'Assets/Gemini_Generated_Image_boy_one.png'
     };
 
-    // ATUALIZADO: Variável para guardar o avatar da sessão (feito por upload)
     let sessionUploadedAvatarURL = null;
 
     // --- FUNÇÕES DE RENDERIZAÇÃO ---
     function createCardElement(card) {
         const isLiked = likedCardIds.includes(card.id);
         const cardElement = document.createElement('div');
-
-        // Adicionamos 'overflow-hidden' para garantir que nada "vaze" do card.
         cardElement.className = `group card-item bg-gradient-to-r from-blue-50 to-indigo-50 rounded-2xl shadow-lg border border-indigo-100 transition-all duration-300 ease-in-out cursor-pointer overflow-hidden`;
-
         cardElement.dataset.cardId = card.id;
         cardElement.dataset.type = card.type;
         const heartIconClass = isLiked ? 'fas text-red-500' : 'far';
-
-        // VERSÃO CORRIGIDA: O comentário inválido foi removido.
         cardElement.innerHTML = `
         <div class="flex justify-between items-start p-4">
             <div class="flex-1">
@@ -56,31 +48,22 @@ document.addEventListener('DOMContentLoaded', () => {
                 <button class="delete-btn hover:text-red-500" title="Excluir"><i class="fas fa-trash-alt"></i></button>
             </div>
         </div>`;
-
-        // Esta lógica para esconder/mostrar continua a mesma e vai funcionar
-        // agora que o HTML está correto.
         const paragraph = cardElement.querySelector('p');
         const footer = cardElement.querySelector('.card-footer');
-
-        // Esconde os elementos por padrão
         if (paragraph) paragraph.style.display = 'none';
         if (footer) footer.style.display = 'none';
-
-        // Adiciona o evento de HOVER (passar o mouse)
         cardElement.addEventListener('mouseenter', () => {
             if (paragraph) paragraph.style.display = 'block';
             if (footer) footer.style.display = 'flex';
         });
-
-        // Adiciona o evento de SAÍDA do mouse
         cardElement.addEventListener('mouseleave', () => {
             if (paragraph) paragraph.style.display = 'none';
             if (footer) footer.style.display = 'none';
         });
-
         updateCardAvatar(cardElement);
         return cardElement;
     }
+
     function renderCards() {
         cardsContainer.innerHTML = '';
         const sortedCards = [...cardData].sort((a, b) => likedCardIds.includes(b.id) - likedCardIds.includes(a.id));
@@ -90,52 +73,39 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // --- LÓGICA DO AVATAR (VERSÃO FINAL) ---
+    // --- LÓGICA DO AVATAR ---
     function openAvatarModal() { avatarModal.style.display = 'flex'; }
     function closeAvatarModal() { avatarModal.style.display = 'none'; }
 
-    // ATUALIZADO: Função de upload agora usa URL.createObjectURL e não usa FileReader.
     function handleAvatarUpload(event) {
         const file = event.target.files[0];
         if (!file) return;
-
-        // Limpa a URL do objeto anterior para evitar fugas de memória
         if (sessionUploadedAvatarURL) {
             URL.revokeObjectURL(sessionUploadedAvatarURL);
         }
-
-        // Cria uma URL de objeto temporária para o arquivo
         sessionUploadedAvatarURL = URL.createObjectURL(file);
-
-        // Desmarca qualquer opção pré-definida
         document.querySelectorAll('.avatar-option.selected').forEach(el => el.classList.remove('selected'));
-        // (Opcional) Poderia-se mostrar uma pré-visualização aqui
     }
 
-    // ATUALIZADO: Lógica de salvamento simplificada.
     function saveAvatar() {
         const selectedOption = document.querySelector('.avatar-option.selected');
-
-        // Se uma opção pré-definida foi selecionada, salva permanentemente.
         if (selectedOption) {
             currentUserAvatar.customImage = selectedOption.getAttribute('src');
-            localStorage.setItem('customAvatar', currentUserAvatar.customImage);
-            // Anula qualquer upload pendente da sessão
-            sessionUploadedAvatarURL = null;
+            chrome.storage.sync.set({ 'customAvatar': currentUserAvatar.customImage }, () => {
+                sessionUploadedAvatarURL = null;
+                updateAllAvatars();
+                closeAvatarModal();
+                alert('Avatar atualizado com sucesso!');
+            });
+        } else {
+            updateAllAvatars();
+            closeAvatarModal();
+            alert('Avatar atualizado com sucesso!');
         }
-        // Se nenhuma opção pré-definida foi selecionada, o avatar de upload (já na memória) será usado para a sessão.
-        // Não precisamos fazer nada aqui, pois o sessionUploadedAvatarURL já foi definido.
-
-        updateAllAvatars();
-        closeAvatarModal();
-        alert('Avatar atualizado com sucesso!');
     }
 
-    // ATUALIZADO: Função de atualização agora prioriza o avatar da sessão.
     function updateAllAvatars() {
-        // Decide qual imagem usar: a da sessão (upload) ou a permanente (pré-definida).
         const imageSource = sessionUploadedAvatarURL || currentUserAvatar.customImage;
-
         const allUserIcons = document.querySelectorAll('.card-user-icon > div, #user-avatar');
         allUserIcons.forEach(icon => {
             icon.innerHTML = '';
@@ -144,7 +114,6 @@ document.addEventListener('DOMContentLoaded', () => {
             icon.style.backgroundSize = 'cover';
             icon.style.backgroundPosition = 'center';
         });
-
         if (!userAvatar.querySelector('.fa-camera')) {
             const cameraIconContainer = document.createElement('div');
             cameraIconContainer.className = 'absolute bottom-0 right-0 w-4 h-4 bg-blue-500 rounded-full flex items-center justify-center';
@@ -162,14 +131,95 @@ document.addEventListener('DOMContentLoaded', () => {
         avatarDiv.style.backgroundPosition = 'center';
     }
 
-    // --- LÓGICAS INALTERADAS ---
-    // (Ações dos cards, pesquisa e inicialização)
-    function setupCardActions() { cardsContainer.addEventListener('click', (e) => { const button = e.target.closest('button'); const cardElement = e.target.closest('.card-item'); if (!cardElement) return; const cardId = parseInt(cardElement.dataset.cardId); if (button) { if (button.classList.contains('like-btn')) { toggleLike(cardId, button.querySelector('.fa-heart')); } else if (button.classList.contains('share-btn')) { shareCard(cardId); } else if (button.classList.contains('delete-btn')) { if (confirm('Tem certeza que deseja excluir este card?')) { deleteCard(cardId, cardElement); } } } }); }
-    function toggleLike(cardId, heartIcon) { const cardIndex = likedCardIds.indexOf(cardId); if (cardIndex > -1) { likedCardIds.splice(cardIndex, 1); } else { likedCardIds.push(cardId); heartIcon.classList.add('like-animation'); } localStorage.setItem('likedCardIds', JSON.stringify(likedCardIds)); renderCards(); }
-    function shareCard(cardId) { const card = cardData.find(c => c.id === cardId); if (!card) return; const textToShare = `${card.title}\n\n${card.content}`; if (navigator.share) { navigator.share({ title: card.title, text: card.content, url: window.location.href }); } else { navigator.clipboard.writeText(textToShare).then(() => alert('Conteúdo copiado para a área de transferência!')); } }
-    function deleteCard(cardId, cardElement) { cardElement.style.transition = 'opacity 0.3s ease, transform 0.3s ease'; cardElement.style.opacity = '0'; cardElement.style.transform = 'translateX(100px)'; setTimeout(() => { cardData = cardData.filter(c => c.id !== cardId); likedCardIds = likedCardIds.filter(id => id !== cardId); localStorage.setItem('likedCardIds', JSON.stringify(likedCardIds)); renderCards(); alert('Card excluído com sucesso!'); }, 300); }
-    searchInput.addEventListener('input', function () { const searchTerm = this.value.toLowerCase().trim(); document.querySelectorAll('.card-item').forEach(card => { const title = card.querySelector('h3')?.textContent.toLowerCase() || ''; const content = card.querySelector('p')?.textContent.toLowerCase() || ''; const isVisible = title.includes(searchTerm) || content.includes(searchTerm); card.style.display = isVisible ? '' : 'none'; }); });
-    function initialize() { userAvatar.addEventListener('click', openAvatarModal); closeModal.addEventListener('click', closeAvatarModal); window.addEventListener('click', (e) => e.target === avatarModal && closeAvatarModal()); avatarOptions.forEach(option => { option.addEventListener('click', () => { document.querySelectorAll('.avatar-option.selected').forEach(el => el.classList.remove('selected')); option.classList.add('selected'); avatarUpload.value = ''; sessionUploadedAvatarURL = null; }); }); avatarUpload.addEventListener('change', handleAvatarUpload); saveAvatarBtn.addEventListener('click', saveAvatar); setupCardActions(); updateAllAvatars(); renderCards(); }
+    // --- LÓGICAS DOS CARDS ---
+    function setupCardActions() {
+        cardsContainer.addEventListener('click', (e) => {
+            const button = e.target.closest('button');
+            const cardElement = e.target.closest('.card-item');
+            if (!cardElement) return;
+            const cardId = parseInt(cardElement.dataset.cardId);
+            if (button) {
+                if (button.classList.contains('like-btn')) {
+                    toggleLike(cardId, button.querySelector('.fa-heart'));
+                } else if (button.classList.contains('share-btn')) {
+                    shareCard(cardId);
+                } else if (button.classList.contains('delete-btn')) {
+                    if (confirm('Tem certeza que deseja excluir este card?')) {
+                        deleteCard(cardId, cardElement);
+                    }
+                }
+            }
+        });
+    }
+
+    function toggleLike(cardId) {
+        const cardIndex = likedCardIds.indexOf(cardId);
+        if (cardIndex > -1) {
+            likedCardIds.splice(cardIndex, 1);
+        } else {
+            likedCardIds.push(cardId);
+        }
+        chrome.storage.sync.set({ 'likedCardIds': likedCardIds }, () => {
+            renderCards();
+        });
+    }
+
+    function shareCard(cardId) {
+        const card = cardData.find(c => c.id === cardId);
+        if (!card) return;
+        const textToShare = `${card.title}\n\n${card.content}`;
+        navigator.clipboard.writeText(textToShare).then(() => alert('Conteúdo copiado para a área de transferência!'));
+    }
+
+    function deleteCard(cardId, cardElement) {
+        cardElement.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
+        cardElement.style.opacity = '0';
+        cardElement.style.transform = 'translateX(100px)';
+        setTimeout(() => {
+            cardData = cardData.filter(c => c.id !== cardId);
+            likedCardIds = likedCardIds.filter(id => id !== cardId);
+            chrome.storage.sync.set({ 'likedCardIds': likedCardIds }, () => {
+                renderCards();
+                alert('Card excluído com sucesso!');
+            });
+        }, 300);
+    }
+
+    searchInput.addEventListener('input', function () {
+        const searchTerm = this.value.toLowerCase().trim();
+        document.querySelectorAll('.card-item').forEach(card => {
+            const title = card.querySelector('h3')?.textContent.toLowerCase() || '';
+            const content = card.querySelector('p')?.textContent.toLowerCase() || '';
+            const isVisible = title.includes(searchTerm) || content.includes(searchTerm);
+            card.style.display = isVisible ? '' : 'none';
+        });
+    });
+
+    function initialize() {
+        // Carrega os dados salvos
+        chrome.storage.sync.get(['likedCardIds', 'customAvatar'], (result) => {
+            likedCardIds = result.likedCardIds || [];
+            currentUserAvatar.customImage = result.customAvatar || 'Assets/Gemini_Generated_Image_boy_one.png';
+
+            // Adiciona os eventos
+            userAvatar.addEventListener('click', openAvatarModal);
+            closeModal.addEventListener('click', closeAvatarModal);
+            window.addEventListener('click', (e) => e.target === avatarModal && closeAvatarModal());
+            avatarOptions.forEach(option => {
+                option.addEventListener('click', () => {
+                    document.querySelectorAll('.avatar-option.selected').forEach(el => el.classList.remove('selected'));
+                    option.classList.add('selected');
+                    avatarUpload.value = '';
+                    sessionUploadedAvatarURL = null;
+                });
+            });
+            avatarUpload.addEventListener('change', handleAvatarUpload);
+            saveAvatarBtn.addEventListener('click', saveAvatar);
+            setupCardActions();
+            updateAllAvatars();
+            renderCards();
+        });
+    }
 
     initialize();
 });

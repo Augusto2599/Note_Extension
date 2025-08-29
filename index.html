@@ -6,71 +6,70 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Menu para Extensão</title>
     <link rel="stylesheet" href="dist/output.css">
+    <link rel="stylesheet" href="vendor/css/all.min.css">
 </head>
 
-<body class="bg-gradient-to-br from-blue-50 to-indigo-100 min-h-screen flex items-center justify-center p-4">
-    <div class="bg-white rounded-xl shadow-lg p-6 w-full max-w-md">
-        <header class="flex justify-between items-center mb-8">
-            <div class="relative flex-1 mr-4">
-                <input type="text" id="search-input" placeholder="Pesquisar notas..."
-                    class="w-full pl-4 pr-12 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent transition-all duration-300 ease-in-out">
-                <i class="fas fa-search absolute right-4 top-3.5 text-gray-400"></i>
-            </div>
-            <div id="user-avatar"
-                class="w-12 h-12 rounded-full bg-gradient-to-r from-blue-400 to-indigo-500 flex items-center justify-center text-white font-semibold shadow-md cursor-pointer relative">
-                <div
-                    class="absolute bottom-0 right-0 w-4 h-4 bg-blue-500 rounded-full flex items-center justify-center">
-                    <i class="fas fa-camera text-xs"></i>
-                </div>
-            </div>
-        </header>
+<body class="w-96 h-[550px] bg-white flex flex-col antialiased">
 
-        <main id="cards-wrapper" class="space-y-6">
-            <div id="cards-container" class="space-y-4"></div>
-        </main>
-
-        <div id="avatar-modal" class="modal">
-            <div class="modal-content bg-white p-8 rounded-2xl shadow-xl max-w-md w-full">
-                <div class="flex justify-between items-center mb-4">
-                    <h3 class="text-lg font-semibold">Alterar seu avatar</h3>
-                    <button id="close-modal" class="text-gray-500 hover:text-gray-700">
-                        <i class="fas fa-times"></i>
-                    </button>
-                </div>
-                <div class="mb-4">
-                    <p class="text-sm text-gray-600 mb-2">Escolha um avatar pré-definido:</p>
-                    <div class="grid grid-cols-4 gap-4">
-                        <img src="Assets/Gemini_Generated_Image_girl_one.png" alt="Avatar Menina Cabelo Azul"
-                            class="avatar-option w-16 h-16 rounded-full object-cover mx-auto">
-                        <img src="Assets/Gemini_Generated_Image_girl_two.png" alt="Avatar Menina Cabelo Rosa"
-                            class="avatar-option w-16 h-16 rounded-full object-cover mx-auto">
-                        <img src="Assets/Gemini_Generated_Image_boy_one.png" alt="Avatar Menino Cabelo Preto"
-                            class="avatar-option w-16 h-16 rounded-full object-cover mx-auto">
-                        <img src="Assets/Gemini_Generated_Image_boy_two.png" alt="Avatar Menino Cabelo Escuro"
-                            class="avatar-option w-16 h-16 rounded-full object-cover mx-auto">
-                    </div>
-                </div>
-                <div class="mb-4">
-                    <p class="text-sm text-gray-600 mb-2">Ou faça upload de uma imagem:</p>
-                    <label for="avatar-upload"
-                        class="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50">
-                        <div class="flex flex-col items-center justify-center pt-5 pb-6">
-                            <i class="fas fa-cloud-upload-alt text-gray-400 text-2xl mb-2"></i>
-                            <p class="text-xs text-gray-500">Clique para enviar</p>
-                        </div>
-                        <input id="avatar-upload" type="file" class="hidden" accept="image/*" />
-                    </label>
-                </div>
-                <button id="save-avatar"
-                    class="w-full bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded-lg transition-colors">
-                    Salvar Alterações
-                </button>
+    <header class="flex justify-between items-center p-6 pb-4 border-b flex-shrink-0">
+        <div class="relative flex-1 mr-4">
+            <input type="text" id="search-input" placeholder="Pesquisar notas..."
+                class="w-full pl-4 pr-12 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent transition-all duration-300 ease-in-out">
+            <i class="fas fa-search absolute right-4 top-3.5 text-gray-400"></i>
+        </div>
+        <div id="user-avatar"
+            class="w-12 h-12 rounded-full bg-gradient-to-r from-blue-400 to-indigo-500 flex items-center justify-center text-white font-semibold shadow-md cursor-pointer relative flex-shrink-0">
+            <div class="absolute bottom-0 right-0 w-4 h-4 bg-blue-500 rounded-full flex items-center justify-center">
+                <i class="fas fa-camera text-xs"></i>
             </div>
         </div>
+    </header>
 
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
-        <script src="script.js"></script>
+    <main id="cards-wrapper" class="flex-1 overflow-y-auto p-6">
+        <div id="cards-container" class="space-y-4"></div>
+    </main>
+
+    <div id="avatar-modal" class="modal">
+        <div class="modal-content bg-white p-8 rounded-2xl shadow-xl max-w-md w-full">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-lg font-semibold">Alterar seu avatar</h3>
+                <button id="close-modal" class="text-gray-500 hover:text-gray-700">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="mb-4">
+                <p class="text-sm text-gray-600 mb-2">Escolha um avatar pré-definido:</p>
+                <div class="grid grid-cols-4 gap-4">
+                    <img src="Assets/Gemini_Generated_Image_girl_one.png" alt="Avatar Menina Cabelo Azul"
+                        class="avatar-option w-16 h-16 rounded-full object-cover mx-auto">
+                    <img src="Assets/Gemini_Generated_Image_girl_two.png" alt="Avatar Menina Cabelo Rosa"
+                        class="avatar-option w-16 h-16 rounded-full object-cover mx-auto">
+                    <img src="Assets/Gemini_Generated_Image_boy_one.png" alt="Avatar Menino Cabelo Preto"
+                        class="avatar-option w-16 h-16 rounded-full object-cover mx-auto">
+                    <img src="Assets/Gemini_Generated_Image_boy_two.png" alt="Avatar Menino Cabelo Escuro"
+                        class="avatar-option w-16 h-16 rounded-full object-cover mx-auto">
+                </div>
+            </div>
+            <div class="mb-4">
+                <p class="text-sm text-gray-600 mb-2">Ou faça upload de uma imagem:</p>
+                <label for="avatar-upload"
+                    class="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50">
+                    <div class="flex flex-col items-center justify-center pt-5 pb-6">
+                        <i class="fas fa-cloud-upload-alt text-gray-400 text-2xl mb-2"></i>
+                        <p class="text-xs text-gray-500">Clique para enviar</p>
+                    </div>
+                    <input id="avatar-upload" type="file" class="hidden" accept="image/*" />
+                </label>
+            </div>
+            <button id="save-avatar"
+                class="w-full bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded-lg transition-colors">
+                Salvar Alterações
+            </button>
+        </div>
     </div>
+
+    <script src="script.js"></script>
+
 </body>
 
 </html>

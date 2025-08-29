@@ -1,0 +1,25 @@
+{
+    "manifest_version": 3,
+    "name": "Note Extension",
+    "version": "1.0",
+    "description": "Uma extensão para criar e gerenciar notas.",
+    "permissions": [
+        "storage"
+    ],
+    "action": {
+        "default_popup": "index.html",
+        "default_icon": {
+            "16": "Assets/Gemini_Generated_Image_girl_one.png",
+            "48": "Assets/Gemini_Generated_Image_girl_one.png",
+            "128": "Assets/Gemini_Generated_Image_girl_one.png"
+        }
+    },
+    "icons": {
+        "16": "Assets/Gemini_Generated_Image_girl_one.png",
+        "48": "Assets/Gemini_Generated_Image_girl_one.png",
+        "128": "Assets/Gemini_Generated_Image_girl_one.png"
+    },
+    "content_security_policy": {
+        "extension_pages": "script-src 'self'; object-src 'self';"
+    }
+}
