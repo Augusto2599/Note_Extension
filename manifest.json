@@ -9,15 +9,15 @@
     "action": {
         "default_popup": "index.html",
         "default_icon": {
-            "16": "Assets/Gemini_Generated_Image_girl_one.png",
-            "48": "Assets/Gemini_Generated_Image_girl_one.png",
-            "128": "Assets/Gemini_Generated_Image_girl_one.png"
+            "16": "Assets/notes.png",
+            "48": "Assets/notes.png",
+            "128": "Assets/notes.png"
         }
     },
     "icons": {
-        "16": "Assets/Gemini_Generated_Image_girl_one.png",
-        "48": "Assets/Gemini_Generated_Image_girl_one.png",
-        "128": "Assets/Gemini_Generated_Image_girl_one.png"
+        "16": "Assets/notes.png",
+        "48": "Assets/notes.png",
+        "128": "Assets/notes.png"
     },
     "content_security_policy": {
         "extension_pages": "script-src 'self'; object-src 'self';"
