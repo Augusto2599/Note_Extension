@@ -89,18 +89,39 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function saveAvatar() {
         const selectedOption = document.querySelector('.avatar-option.selected');
+
         if (selectedOption) {
-            currentUserAvatar.customImage = selectedOption.getAttribute('src');
-            chrome.storage.sync.set({ 'customAvatar': currentUserAvatar.customImage }, () => {
+            // Salva um avatar da lista
+            const avatarSrc = selectedOption.getAttribute('src');
+            // Usa chrome.storage.local para o avatar
+            chrome.storage.local.set({ 'customAvatar': avatarSrc }, () => {
+                currentUserAvatar.customImage = avatarSrc;
                 sessionUploadedAvatarURL = null;
                 updateAllAvatars();
                 closeAvatarModal();
                 alert('Avatar atualizado com sucesso!');
             });
+        } else if (sessionUploadedAvatarURL) {
+            // Salva a imagem que foi feito upload
+            fetch(sessionUploadedAvatarURL)
+                .then(res => res.blob())
+                .then(blob => {
+                    const reader = new FileReader();
+                    reader.onload = function (e) {
+                        const base64Image = e.target.result;
+                        // Usa chrome.storage.local para o avatar
+                        chrome.storage.local.set({ 'customAvatar': base64Image }, () => {
+                            currentUserAvatar.customImage = base64Image;
+                            sessionUploadedAvatarURL = null;
+                            updateAllAvatars();
+                            closeAvatarModal();
+                            alert('Avatar atualizado com sucesso!');
+                        });
+                    };
+                    reader.readAsDataURL(blob);
+                });
         } else {
-            updateAllAvatars();
             closeAvatarModal();
-            alert('Avatar atualizado com sucesso!');
         }
     }
 
@@ -178,7 +199,8 @@ document.addEventListener('DOMContentLoaded', () => {
         setTimeout(() => {
             cardData = cardData.filter(c => c.id !== cardId);
             likedCardIds = likedCardIds.filter(id => id !== cardId);
-            chrome.storage.sync.set({ 'likedCardIds': likedCardIds }, () => {
+            // Salva o estado atualizado dos cards e curtidas
+            chrome.storage.sync.set({ 'cardData': cardData, 'likedCardIds': likedCardIds }, () => {
                 renderCards();
                 alert('Card excluído com sucesso!');
             });
@@ -196,28 +218,39 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     function initialize() {
-        // Carrega os dados salvos
-        chrome.storage.sync.get(['likedCardIds', 'customAvatar'], (result) => {
-            likedCardIds = result.likedCardIds || [];
-            currentUserAvatar.customImage = result.customAvatar || 'Assets/Gemini_Generated_Image_boy_one.png';
+        // Carrega os dados dos cards e curtidas do storage.sync
+        chrome.storage.sync.get(['cardData', 'likedCardIds'], (syncResult) => {
+            if (syncResult.cardData) {
+                cardData = syncResult.cardData;
+            }
+            likedCardIds = syncResult.likedCardIds || [];
 
-            // Adiciona os eventos
-            userAvatar.addEventListener('click', openAvatarModal);
-            closeModal.addEventListener('click', closeAvatarModal);
-            window.addEventListener('click', (e) => e.target === avatarModal && closeAvatarModal());
-            avatarOptions.forEach(option => {
-                option.addEventListener('click', () => {
-                    document.querySelectorAll('.avatar-option.selected').forEach(el => el.classList.remove('selected'));
-                    option.classList.add('selected');
-                    avatarUpload.value = '';
-                    sessionUploadedAvatarURL = null;
+            // Carrega o avatar do storage.local
+            chrome.storage.local.get(['customAvatar'], (localResult) => {
+                currentUserAvatar.customImage = localResult.customAvatar || 'Assets/Gemini_Generated_Image_boy_one.png';
+
+                // O restante da sua função de inicialização continua aqui
+                userAvatar.addEventListener('click', openAvatarModal);
+                closeModal.addEventListener('click', closeAvatarModal);
+                window.addEventListener('click', (e) => e.target === avatarModal && closeAvatarModal());
+                avatarOptions.forEach(option => {
+                    option.addEventListener('click', () => {
+                        document.querySelectorAll('.avatar-option.selected').forEach(el => el.classList.remove('selected'));
+                        option.classList.add('selected');
+                        if (avatarUpload) {
+                            avatarUpload.value = '';
+                        }
+                        sessionUploadedAvatarURL = null;
+                    });
                 });
+                if (avatarUpload) {
+                    avatarUpload.addEventListener('change', handleAvatarUpload);
+                }
+                saveAvatarBtn.addEventListener('click', saveAvatar);
+                setupCardActions();
+                updateAllAvatars();
+                renderCards();
             });
-            avatarUpload.addEventListener('change', handleAvatarUpload);
-            saveAvatarBtn.addEventListener('click', saveAvatar);
-            setupCardActions();
-            updateAllAvatars();
-            renderCards();
         });
     }
 
