@@ -73,6 +73,24 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    // --- NOVA FUNÇÃO PARA NOTIFICAÇÕES DISCRETAS ---
+    function showToast(message) {
+        const toast = document.getElementById('toast-notification');
+        const toastMessage = document.getElementById('toast-message');
+
+        if (!toast || !toastMessage) return;
+
+        toastMessage.textContent = message;
+        toast.classList.remove('opacity-0');
+        toast.classList.add('opacity-100');
+
+        // Esconde a notificação após 3 segundos
+        setTimeout(() => {
+            toast.classList.remove('opacity-100');
+            toast.classList.add('opacity-0');
+        }, 3000);
+    }
+
     // --- LÓGICA DO AVATAR ---
     function openAvatarModal() { avatarModal.style.display = 'flex'; }
     function closeAvatarModal() { avatarModal.style.display = 'none'; }
@@ -99,7 +117,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 sessionUploadedAvatarURL = null;
                 updateAllAvatars();
                 closeAvatarModal();
-                alert('Avatar atualizado com sucesso!');
+                showToast('Avatar atualizado com sucesso!');
             });
         } else if (sessionUploadedAvatarURL) {
             // Salva a imagem que foi feito upload
@@ -115,7 +133,7 @@ document.addEventListener('DOMContentLoaded', () => {
                             sessionUploadedAvatarURL = null;
                             updateAllAvatars();
                             closeAvatarModal();
-                            alert('Avatar atualizado com sucesso!');
+                            showToast('Avatar atualizado com sucesso!');
                         });
                     };
                     reader.readAsDataURL(blob);
@@ -189,7 +207,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const card = cardData.find(c => c.id === cardId);
         if (!card) return;
         const textToShare = `${card.title}\n\n${card.content}`;
-        navigator.clipboard.writeText(textToShare).then(() => alert('Conteúdo copiado para a área de transferência!'));
+        navigator.clipboard.writeText(textToShare).then(() => showToast('Conteúdo copiado para a área de transferência!'));
     }
 
     function deleteCard(cardId, cardElement) {
@@ -202,7 +220,7 @@ document.addEventListener('DOMContentLoaded', () => {
             // Salva o estado atualizado dos cards e curtidas
             chrome.storage.sync.set({ 'cardData': cardData, 'likedCardIds': likedCardIds }, () => {
                 renderCards();
-                alert('Card excluído com sucesso!');
+                showToast('Card excluído com sucesso!');
             });
         }, 300);
     }
