@@ -236,21 +236,28 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     function initialize() {
+        // Dados padrão apenas se nada estiver salvo
+        const defaultCardData = [
+            { id: 1, type: 'small', title: 'Título do Card', content: 'Este é o texto do card, posicionado abaixo do título e alinhado à esquerda. Pode conter informações relevantes sobre o conteúdo do card.', timestamp: '27/08/2023 às 14:30' },
+            { id: 2, type: 'small', title: 'Ideias Projeto', content: 'Sistema de gestão de tarefas com interface moderna e intuitiva para melhor produtividade.', timestamp: '12/08/2023 às 09:15' },
+            { id: 3, type: 'small', title: 'Lista Compras', content: 'Leite, ovos, pão integral, frutas, vegetais e outros itens essenciais para a semana.', timestamp: '10/08/2023 às 16:45' },
+        ];
+
         // Carrega os dados dos cards e curtidas do storage.sync
         chrome.storage.sync.get(['cardData', 'likedCardIds'], (syncResult) => {
-            if (syncResult.cardData) {
-                cardData = syncResult.cardData;
-            }
+            // Usa os dados salvos, ou os dados padrão se não houver nada salvo
+            cardData = syncResult.cardData || defaultCardData;
             likedCardIds = syncResult.likedCardIds || [];
 
             // Carrega o avatar do storage.local
             chrome.storage.local.get(['customAvatar'], (localResult) => {
                 currentUserAvatar.customImage = localResult.customAvatar || 'Assets/Gemini_Generated_Image_boy_one.png';
 
-                // O restante da sua função de inicialização continua aqui
                 userAvatar.addEventListener('click', openAvatarModal);
                 closeModal.addEventListener('click', closeAvatarModal);
-                window.addEventListener('click', (e) => e.target === avatarModal && closeAvatarModal());
+                // ... resto do seu código da função initialize ...
+                // ... (o código restante permanece o mesmo) ...
+
                 avatarOptions.forEach(option => {
                     option.addEventListener('click', () => {
                         document.querySelectorAll('.avatar-option.selected').forEach(el => el.classList.remove('selected'));

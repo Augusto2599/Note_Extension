@@ -4,8 +4,14 @@
     "version": "1.0",
     "description": "Uma extensão para criar e gerenciar notas.",
     "permissions": [
-        "storage"
+        "storage",
+        "contextMenus",
+        "activeTab",
+        "scripting"
     ],
+    "background": {
+        "service_worker": "background.js"
+    },
     "action": {
         "default_popup": "index.html",
         "default_icon": {
