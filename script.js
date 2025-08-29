@@ -9,20 +9,35 @@ document.addEventListener('DOMContentLoaded', () => {
     const searchInput = document.getElementById('search-input');
     const cardsContainer = document.getElementById('cards-container');
 
+    // Elementos do novo modal de notas
+    const noteConfirmationModal = document.getElementById('note-confirmation-modal');
+    const noteTitleInput = document.getElementById('note-title-input');
+    const noteContentTextarea = document.getElementById('note-content-textarea');
+    const saveNoteBtn = document.getElementById('save-note-btn');
+    const discardNoteBtn = document.getElementById('discard-note-btn');
+
+    // Elementos da notificação "toast"
+    const toast = document.getElementById('toast-notification');
+    const toastMessage = document.getElementById('toast-message');
+
+
     // --- ESTADO DA APLICAÇÃO ---
-    let cardData = [
-        { id: 1, type: 'small', title: 'Título do Card', content: 'Este é o texto do card, posicionado abaixo do título e alinhado à esquerda. Pode conter informações relevantes sobre o conteúdo do card.', timestamp: '27/08/2023 às 14:30' },
-        { id: 2, type: 'small', title: 'Ideias Projeto', content: 'Sistema de gestão de tarefas com interface moderna e intuitiva para melhor produtividade.', timestamp: '12/08/2023 às 09:15' },
-        { id: 3, type: 'small', title: 'Lista Compras', content: 'Leite, ovos, pão integral, frutas, vegetais e outros itens essenciais para a semana.', timestamp: '10/08/2023 às 16:45' },
-        { id: 4, type: 'small', title: 'Reunião Equipe', content: 'Preparar agenda para reunião de equipe sobre os próximos passos do projeto principal.', timestamp: '15/08/2023 às 11:30' },
-        { id: 5, type: 'small', title: 'Estudos', content: 'Revisar materiais de TailwindCSS e JavaScript para aprofundar conhecimentos técnicos.', timestamp: '20/08/2023 às 14:20' },
-    ];
+    let cardData = [];
     let likedCardIds = [];
     let currentUserAvatar = {
         customImage: 'Assets/Gemini_Generated_Image_boy_one.png'
     };
-
     let sessionUploadedAvatarURL = null;
+
+    // --- FUNÇÕES DE NOTIFICAÇÃO ---
+    function showToast(message) {
+        if (!toast || !toastMessage) return;
+        toastMessage.textContent = message;
+        toast.style.opacity = '1';
+        setTimeout(() => {
+            toast.style.opacity = '0';
+        }, 3000);
+    }
 
     // --- FUNÇÕES DE RENDERIZAÇÃO ---
     function createCardElement(card) {
@@ -73,24 +88,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // --- NOVA FUNÇÃO PARA NOTIFICAÇÕES DISCRETAS ---
-    function showToast(message) {
-        const toast = document.getElementById('toast-notification');
-        const toastMessage = document.getElementById('toast-message');
-
-        if (!toast || !toastMessage) return;
-
-        toastMessage.textContent = message;
-        toast.classList.remove('opacity-0');
-        toast.classList.add('opacity-100');
-
-        // Esconde a notificação após 3 segundos
-        setTimeout(() => {
-            toast.classList.remove('opacity-100');
-            toast.classList.add('opacity-0');
-        }, 3000);
-    }
-
     // --- LÓGICA DO AVATAR ---
     function openAvatarModal() { avatarModal.style.display = 'flex'; }
     function closeAvatarModal() { avatarModal.style.display = 'none'; }
@@ -107,11 +104,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function saveAvatar() {
         const selectedOption = document.querySelector('.avatar-option.selected');
-
         if (selectedOption) {
-            // Salva um avatar da lista
             const avatarSrc = selectedOption.getAttribute('src');
-            // Usa chrome.storage.local para o avatar
             chrome.storage.local.set({ 'customAvatar': avatarSrc }, () => {
                 currentUserAvatar.customImage = avatarSrc;
                 sessionUploadedAvatarURL = null;
@@ -120,14 +114,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 showToast('Avatar atualizado com sucesso!');
             });
         } else if (sessionUploadedAvatarURL) {
-            // Salva a imagem que foi feito upload
             fetch(sessionUploadedAvatarURL)
                 .then(res => res.blob())
                 .then(blob => {
                     const reader = new FileReader();
                     reader.onload = function (e) {
                         const base64Image = e.target.result;
-                        // Usa chrome.storage.local para o avatar
                         chrome.storage.local.set({ 'customAvatar': base64Image }, () => {
                             currentUserAvatar.customImage = base64Image;
                             sessionUploadedAvatarURL = null;
@@ -142,6 +134,7 @@ document.addEventListener('DOMContentLoaded', () => {
             closeAvatarModal();
         }
     }
+
 
     function updateAllAvatars() {
         const imageSource = sessionUploadedAvatarURL || currentUserAvatar.customImage;
@@ -168,6 +161,40 @@ document.addEventListener('DOMContentLoaded', () => {
         avatarDiv.style.backgroundImage = `url(${imageSource})`;
         avatarDiv.style.backgroundSize = 'cover';
         avatarDiv.style.backgroundPosition = 'center';
+    }
+
+    // --- LÓGICA DO NOVO MODAL DE NOTAS ---
+    function openNoteConfirmationModal(text) {
+        noteTitleInput.value = text.substring(0, 30) + (text.length > 30 ? '...' : '');
+        noteContentTextarea.value = text;
+        noteConfirmationModal.style.display = 'flex';
+    }
+
+    function closeNoteConfirmationModal() {
+        noteConfirmationModal.style.display = 'none';
+        chrome.storage.local.remove('newNoteFromSelection');
+    }
+
+    function saveNewNote() {
+        const title = noteTitleInput.value.trim();
+        const content = noteContentTextarea.value.trim();
+        if (!title || !content) {
+            alert('O título e o conteúdo não podem estar vazios.');
+            return;
+        }
+        const newCard = {
+            id: Date.now(),
+            type: 'small',
+            title: title,
+            content: content,
+            timestamp: new Date().toLocaleString('pt-BR')
+        };
+        cardData.unshift(newCard);
+        chrome.storage.sync.set({ 'cardData': cardData }, () => {
+            renderCards();
+            showToast('Nota salva com sucesso!');
+            closeNoteConfirmationModal();
+        });
     }
 
     // --- LÓGICAS DOS CARDS ---
@@ -217,7 +244,6 @@ document.addEventListener('DOMContentLoaded', () => {
         setTimeout(() => {
             cardData = cardData.filter(c => c.id !== cardId);
             likedCardIds = likedCardIds.filter(id => id !== cardId);
-            // Salva o estado atualizado dos cards e curtidas
             chrome.storage.sync.set({ 'cardData': cardData, 'likedCardIds': likedCardIds }, () => {
                 renderCards();
                 showToast('Card excluído com sucesso!');
@@ -235,49 +261,52 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    function initialize() {
-        // Dados padrão apenas se nada estiver salvo
-        const defaultCardData = [
-            { id: 1, type: 'small', title: 'Título do Card', content: 'Este é o texto do card, posicionado abaixo do título e alinhado à esquerda. Pode conter informações relevantes sobre o conteúdo do card.', timestamp: '27/08/2023 às 14:30' },
-            { id: 2, type: 'small', title: 'Ideias Projeto', content: 'Sistema de gestão de tarefas com interface moderna e intuitiva para melhor produtividade.', timestamp: '12/08/2023 às 09:15' },
-            { id: 3, type: 'small', title: 'Lista Compras', content: 'Leite, ovos, pão integral, frutas, vegetais e outros itens essenciais para a semana.', timestamp: '10/08/2023 às 16:45' },
-        ];
-
-        // Carrega os dados dos cards e curtidas do storage.sync
+    // --- FUNÇÕES DE INICIALIZAÇÃO ---
+    function loadDataAndRender() {
         chrome.storage.sync.get(['cardData', 'likedCardIds'], (syncResult) => {
-            // Usa os dados salvos, ou os dados padrão se não houver nada salvo
-            cardData = syncResult.cardData || defaultCardData;
+            cardData = syncResult.cardData || [];
             likedCardIds = syncResult.likedCardIds || [];
 
-            // Carrega o avatar do storage.local
-            chrome.storage.local.get(['customAvatar'], (localResult) => {
+            chrome.storage.local.get(['customAvatar', 'newNoteFromSelection'], (localResult) => {
                 currentUserAvatar.customImage = localResult.customAvatar || 'Assets/Gemini_Generated_Image_boy_one.png';
 
-                userAvatar.addEventListener('click', openAvatarModal);
-                closeModal.addEventListener('click', closeAvatarModal);
-                // ... resto do seu código da função initialize ...
-                // ... (o código restante permanece o mesmo) ...
-
-                avatarOptions.forEach(option => {
-                    option.addEventListener('click', () => {
-                        document.querySelectorAll('.avatar-option.selected').forEach(el => el.classList.remove('selected'));
-                        option.classList.add('selected');
-                        if (avatarUpload) {
-                            avatarUpload.value = '';
-                        }
-                        sessionUploadedAvatarURL = null;
-                    });
-                });
-                if (avatarUpload) {
-                    avatarUpload.addEventListener('change', handleAvatarUpload);
-                }
-                saveAvatarBtn.addEventListener('click', saveAvatar);
-                setupCardActions();
                 updateAllAvatars();
                 renderCards();
+
+                if (localResult.newNoteFromSelection) {
+                    openNoteConfirmationModal(localResult.newNoteFromSelection);
+                }
             });
         });
     }
 
+    function initialize() {
+        // Registra todos os eventos primeiro
+        userAvatar.addEventListener('click', openAvatarModal);
+        closeModal.addEventListener('click', closeAvatarModal);
+        window.addEventListener('click', (e) => e.target === avatarModal && closeAvatarModal());
+
+        avatarOptions.forEach(option => {
+            option.addEventListener('click', () => {
+                document.querySelectorAll('.avatar-option.selected').forEach(el => el.classList.remove('selected'));
+                option.classList.add('selected');
+                if (avatarUpload) avatarUpload.value = '';
+                sessionUploadedAvatarURL = null;
+            });
+        });
+
+        if (avatarUpload) avatarUpload.addEventListener('change', handleAvatarUpload);
+        saveAvatarBtn.addEventListener('click', saveAvatar);
+
+        saveNoteBtn.addEventListener('click', saveNewNote);
+        discardNoteBtn.addEventListener('click', closeNoteConfirmationModal);
+
+        setupCardActions();
+
+        // Depois de configurar tudo, carrega os dados
+        loadDataAndRender();
+    }
+
+    // Inicia a aplicação
     initialize();
 });
