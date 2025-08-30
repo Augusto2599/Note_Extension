@@ -40,7 +40,7 @@
     "web_accessible_resources": [
         {
             "resources": [
-                "Assets/notes.png"
+                "Assets/penWhithnote.png"
             ],
             "matches": [
                 "<all_urls>"

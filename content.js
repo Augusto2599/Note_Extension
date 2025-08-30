@@ -10,7 +10,7 @@ function createFloatingIcon() {
     floatingIcon.id = 'note-extension-save-icon';
 
     const iconImage = document.createElement('img');
-    iconImage.src = chrome.runtime.getURL('Assets/notes.png');
+    iconImage.src = chrome.runtime.getURL('Assets/penWhithnote.png');
     floatingIcon.appendChild(iconImage);
 
     document.body.appendChild(floatingIcon);
